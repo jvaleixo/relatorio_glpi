@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 # === CARREGAR DADOS ===
-caminho_csv = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/glpi_mudancas/naosolucionado.csv'
+caminho_csv = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/glpi_mudancas/naosolucionados.csv'
 df = pd.read_csv(caminho_csv, sep=';')
 
 COLUNA_STATUS = 'Status'
@@ -16,7 +16,11 @@ df[COLUNA_STATUS] = df[COLUNA_STATUS].fillna('').apply(
 df[COLUNA_ETIQUETAS] = df[COLUNA_ETIQUETAS].astype(str).str.lower()
 
 # Lista de etiquetas alvo
-etiquetas_alvo = ['gw', 'inv', 'mdx', 'solarimétrica', 'sw', 'tracker', 'utr','ufv aceita','falta de info', 'energização', 'fibra óptica', 'datalogger', 'combinerbox','relé de trafo','relé de proteção','multimedidor','medidor','internet local','roteador','cftv']
+etiquetas_alvo = [
+    'gw', 'inv', 'mdx', 'solarimétrica', 'sw', 'tracker', 'utr','falta de info', 'energização', 'fibra óptica',
+    'datalogger', 'combinerbox', 'relé de trafo','relé de proteção',
+    'multimedidor','medidor','internet local','roteador','cftv'
+]
 
 # Coleta todos os status únicos no dataset
 todos_status = set()
@@ -36,12 +40,18 @@ for _, row in df.iterrows():
 # Converte para DataFrame
 df_contagens = pd.DataFrame(contagens).fillna(0).astype(int)
 
-# === GERAÇÃO DO GRÁFICO ===
+# === CONTAGEM TOTAL POR ETIQUETA (SOMANDO TODOS OS STATUS) ===
+total_por_etiqueta = df_contagens.sum(axis=1).sort_values(ascending=False)
+
+# === GERAÇÃO DOS GRÁFICOS ===
 hoje = datetime.today()
 nomes_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 mes_atual = nomes_meses[hoje.month - 1]
 
-# Cria gráfico de barras agrupadas
+# Caminho para salvar gráficos
+caminho_base = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/graficos_mudancas'
+
+# === GRÁFICO DE BARRAS AGRUPADAS POR STATUS ===
 plt.figure(figsize=(12, 6))
 largura_barra = 0.1
 x = range(len(etiquetas_alvo))
@@ -63,8 +73,44 @@ plt.legend(title="Status")
 plt.tight_layout()
 plt.grid(axis='y', linestyle='--', alpha=0.6)
 
-# Salva as imagens
-caminho_base = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/graficos_mudancas'
+# Salva as imagens do gráfico por status
 plt.savefig(f'{caminho_base}/contador_etiquetas_todos_status.png')
 plt.savefig(f'{caminho_base}/contador_etiquetas_todos_status_{mes_atual}_{hoje.year}.png')
+plt.show()
+
+# === GRÁFICO DE TOTAL DE OCORRÊNCIAS POR ETIQUETA (SOMANDO TODOS STATUS) ===
+plt.figure(figsize=(12, 6))
+total_por_etiqueta.plot(kind='bar', color='steelblue')
+
+plt.title(f'Total de Ocorrências por Etiqueta - {mes_atual} {hoje.year}')
+plt.xlabel('Etiqueta')
+plt.ylabel('Total de Ocorrências')
+plt.xticks(rotation=75)
+plt.tight_layout()
+plt.grid(axis='y', linestyle='--', alpha=0.6)
+
+# Salva o gráfico total por etiqueta
+plt.savefig(f'{caminho_base}/total_ocorrencias_etiquetas_{mes_atual}_{hoje.year}.png')
+plt.show()
+
+# === TOP 10 ETIQUETAS MAIS FREQUENTES ===
+top10_etiquetas = total_por_etiqueta.head(10)
+
+# Exibe no terminal (opcional)
+print("Top 10 etiquetas mais frequentes:")
+print(top10_etiquetas)
+
+# === GRÁFICO DO TOP 10 ===
+plt.figure(figsize=(10, 5))
+top10_etiquetas.plot(kind='bar', color='coral')
+
+plt.title(f'Top 10 Etiquetas Mais Frequentes - {mes_atual} {hoje.year}')
+plt.xlabel('Etiqueta')
+plt.ylabel('Total de Ocorrências')
+plt.xticks(rotation=75)
+plt.tight_layout()
+plt.grid(axis='y', linestyle='--', alpha=0.6)
+
+# Salva o gráfico
+plt.savefig(f'{caminho_base}/top10_ocorrencias_etiquetas_{mes_atual}_{hoje.year}.png')
 plt.show()

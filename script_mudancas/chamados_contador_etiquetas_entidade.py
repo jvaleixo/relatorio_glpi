@@ -5,7 +5,7 @@ from collections import defaultdict
 
 # === CONFIGURAÇÕES ===
 etiqueta_base = 'inv'  # <- Mude aqui para a etiqueta que deseja analisar
-caminho_csv = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/glpi_mudancas/naosolucionado.csv'
+caminho_csv = '/home/aleixo/Documents/pcantigo/Documents/estatistica-glpi/relatorio_mensal/glpi_mudancas/naosolucionados.csv'
 
 # === CARREGAR O CSV ===
 df = pd.read_csv(caminho_csv, sep=';')
